@@ -21,7 +21,10 @@ end cordic_cos;
 
 
 architecture rtl of cordic_cos is
-
+	--! constants
+	constant c_q1 : integer := 2**(gen_internal_res-2);
+	constant c_q2 : integer := 2**(gen_internal_res-1);
+	constant c_q3 : integer := 2**(gen_internal_res-1) + 2**(gen_internal_res-2);
     -- signals
     signal r_cnt : integer  range 0 to 100;
     type t_cordic_state is (IDLE, LOAD, RUN, DONE );
@@ -31,8 +34,7 @@ architecture rtl of cordic_cos is
     signal r_quadrant : integer := 0;
     signal r_X: signed(gen_internal_res-1 downto 0);
     signal r_Y: signed(gen_internal_res-1 downto 0);
-    signal r_current_angle: signed(gen_internal_res-1 downto 0);
-    signal r_target_angle: signed(gen_internal_res-1 downto 0);
+    signal r_Z: signed(gen_internal_res-1 downto 0);
     signal r_iteration : integer;
 
 constant tan_lkp : uint16_array_t := (
@@ -65,8 +67,7 @@ constant tan_lkp : uint16_array_t := (
         r_valid <= '0';
 		r_X <= to_signed(0, gen_internal_res);
 		r_Y <= to_signed(0, gen_internal_res);
-		r_current_angle <= to_signed(0, gen_internal_res);
-		r_target_angle <= to_signed(0, gen_internal_res);
+		r_Z <= to_signed(0, gen_internal_res);
         r_dir <='0';
         r_quadrant <= 0;
         cos <= to_signed(0, gen_output_res);
@@ -78,7 +79,7 @@ constant tan_lkp : uint16_array_t := (
             case state is
                 when IDLE =>
                     r_iteration <= 0;
-                    r_current_angle <= to_signed(0, gen_internal_res);
+                    r_Z <= to_signed(0, gen_internal_res);
                     r_dir <='0';
                     r_quadrant <= 0;
                     if start = '1' then 
@@ -89,33 +90,33 @@ constant tan_lkp : uint16_array_t := (
                     X <= to_signed(2480, gen_internal_res); -- 2480*gain(16) = 4095 ;)
                     Y <= to_signed(0, gen_internal_res);
                     --! To shift back to quadrant 1
-                    if(angle < -16384) then
-                        r_target_angle <= angle + 2*16384;
-                        r_quadrant <= 0;
-                    elsif(angle < 0) then
-                        r_target_angle <= angle + 16384;
-                        r_quadrant <= 1;
-                    elsif(angle < 16384) then
-                        r_target_angle <= angle ;
+                    if(angle > to_unsigned(c_q3,gen_internal_res)) then
+                        r_Z  <= angle - to_unsigned(c_q3,gen_internal_res);
+                        r_quadrant <= 3;
+                    elsif(angle > to_unsigned(c_q2,gen_internal_res)) then
+                        r_Z <= angle - to_unsigned(c_q3,gen_internal_res);
                         r_quadrant <= 2;
+                    elsif(angle > to_unsigned(c_q1  ,gen_internal_res)) then
+                        r_Z <= angle - to_unsigned(c_q3,gen_internal_res);
+                        r_quadrant <= 1;
                     else
-                        r_target_angle <= angle - 16384;
-                        r_quadrant <= 3;        
+                        r_Z <= angle;
+                        r_quadrant <= 0m;        
                     end if;
                     r_state <= RUN;
                         
 
                 when RUN =>
-                    if r_current_angle < r_target_angle then
-                        r_dir <='1';
-                        r_current_angle <= r_current_angle + signed(tan_lkp(iteration));
+                    if r_Z < = then
+                        r_dir <='1';                        
                         r_X <= r_X - shift_right(r_Y, iteration);
                         r_Y <= r_Y + shift_right(r_X, iteration);
+                        r_Z <= r_Z + signed(tan_lkp(iteration));
                     else
-                        r_dir <='0';
-                        r_current_angle <= r_current_angle - signed(tan_lkp(iteration));
+                        r_dir <='0';                        
                         r_X <= r_X + shift_right(r_Y, iteration);
                         r_Y <= r_Y - shift_right(r_X, iteration);
+                        r_Z <= r_Z - signed(tan_lkp(iteration));
                     end if;
                         
                     if r_iteration < gen_internal_res-1 then 
