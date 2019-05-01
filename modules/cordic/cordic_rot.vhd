@@ -92,8 +92,7 @@ architecture rtl of cordic_rot is
 	to_signed(2, gen_size),
 	to_signed(1, gen_size),
 	to_signed(0, gen_size),
-	to_signed(0, gen_size)
-);
+	to_signed(0, gen_size));
  
   begin
 
