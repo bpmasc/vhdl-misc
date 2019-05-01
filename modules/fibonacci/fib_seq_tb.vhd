@@ -27,8 +27,8 @@ architecture test of fib_seq_tb is
 	constant c_output_length : integer := 16;
 
 	--! Signals declaration
-	signal rst : std_logic;
-	signal clk : std_logic;
+    signal clk: std_logic := '0';
+    signal rst: std_logic := '1';
 	signal seq_over : std_logic;
 	signal fib_out : unsigned(c_output_length-1 downto 0);
 
@@ -44,21 +44,25 @@ begin
 					fib_out => fib_out,
 					seq_over => seq_over);
 
-	--! Clock instatiation
-	p_clk : process begin
-		rst <= '1';
-		wait for c_clk_period;
-		rst <= '0';
-		wait;
+
+	--============================================
+	--! Reset instatiation
+	p_reset: process
+	begin
+	  rst <='1';
+	  wait for c_clk_period*2 ns;
+	  rst <= '0';  
+	  wait;
 	end process;
 
-	--! Reset instatiation
-	p_rst : process begin
-		clk <= '1';
-		wait for c_clk_period;
-		clk <= '0';
-		wait for c_clk_period;
-	end process;	
+	--============================================
+	--! Clock instatiation
+	p_clock: process
+	begin
+	  wait for c_clk_period;
+	  clk <= not clk;
+	end process;
+
 
 	--! Main instatiation
 	p_main : process begin

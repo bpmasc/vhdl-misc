@@ -1,0 +1,40 @@
+[*]
+[*] GTKWave Analyzer v3.3.91 (w)1999-2018 BSI
+[*] Wed May 01 17:30:02 2019
+[*]
+[dumpfile] "C:\Users\manue\Desktop\GIT\vhdl-misc\modules\cordic\cordic_rot_tb.vcd"
+[dumpfile_mtime] "Wed May 01 17:28:31 2019"
+[dumpfile_size] 26476
+[savefile] "C:\Users\manue\Desktop\GIT\vhdl-misc\modules\cordic\deleteme.gtkw"
+[timestart] 0
+[size] 1280 737
+[pos] -61 -61
+*-32.073978 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 211
+[signals_width] 134
+[sst_expanded] 1
+[sst_vpaned_height] 203
+@28
+r_start
+@25
+r_theta[15:0]
+@420
+r_x_out[15:0]
+r_y_out[15:0]
+@28
+r_valid
+@24
+inst_cordic.r_debug_state
+@28
+inst_cordic.r_dir
+@24
+inst_cordic.r_iteration
+inst_cordic.r_quadrant
+@420
+inst_cordic.r_x[15:0]
+inst_cordic.r_y[15:0]
+inst_cordic.r_z[15:0]
+inst_cordic.x_out[15:0]
+inst_cordic.y_out[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
