@@ -1,0 +1,104 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage[normalem]{ulem}
+
+\begin{document}
+
+\begin{titlepage}
+CORDIC function tables
+\end{titlepage}
+
+\begin{tabular}{ |l|l|l|l| }
+\hline
+\multicolumn{4}{ |c| }{Circular Coordinate System} \\
+\hline
+\multicolumn{2}{ |c| }{Mode} & Iteration 0 & Iteration n \\ \hline
+\multirow{9}{*}{Rotation Mode} && $ X_{0}=x $ & $X_{n}=F \times [x\times cos(a) - y\times sin(a)]$\\
+ &$ |Z_{0}|<1.74 $& $ Y_{0}=y $ &  $Y_{n}=F \times [x\times sin(a)  y\times cos(a)]$\\
+ &  & $ Z_{0}=a $ &  $Z_{n}=0$\\ \cline{3-4}
+ &   &  $X_{0}=m $ & $X_{n}=F\times m\times cos(a) $\\
+ & $F \approx 1.64 $& $Y_{0}=0 $ & $Y_{n}=F\times m\times sin(a) $\\
+ &   & $Z_{0}=a $ &$Z_{n}=0 $\\ \cline{3-4}
+  &   &  $X_{0}=1/F $ & $X_{n}=cos(a) $\\
+ & $Z_{n} \Rightarrow 0 $& $Y_{0}=0 $ & $Y_{n}=sin(a) $\\
+ &   & $Z_{0}=a $ &$Z_{n}=0 $\\
+ \hline
+\multirow{9}{*}{Vectoring Mode} && $ X_{0}=x $ & $X_{n}=F \times \sqrt{x^2+y^2}$\\
+ &$ |Z_{n}|<1.74 $& $ Y_{0}=y $ &  $Y_{n}=0$\\
+ &  & $ Z_{0}=z $ &  $Z_{n}=z+tan(y/x)$\\ \cline{3-4}
+ &   &  $X_{0}=m $ &  $X_{n}=F \times \sqrt{1+a^2}$\\
+ & $F \approx 1.64 $& $Y_{0}=0 $ & $Y_{n}=0 $\\
+ &   & $Z_{0}=a $ &$Z_{n}=tan(a) $\\ \cline{3-4}
+  &   &  $X_{0}=1/F $ & $X_{n}=F \times \sqrt{a^2+1}$\\
+ & $Y_{n} \Rightarrow 0 $& $Y_{0}=0 $ & $Y_{n}=0 $\\
+ &   & $Z_{0}=a $ &$Z_{n}=cot(a) $\\
+ \hline
+\end{tabular}
+
+
+\begin{equation*}
+  X_{n+1}= cos(\theta)\times X_{n+1} -sin(\theta)\times Y_{n}
+\end{equation*}
+
+
+\begin{tabular}{ |l|l|l|l| }
+\hline
+\multicolumn{4}{ |c| }{Linear Coordinate System} \\
+\hline
+\multicolumn{2}{ |c| }{Mode} & Iteration 0 & Iteration n \\ \hline
+\multirow{3}{*}{Rotation Mode} &$ |Z_{0}|<2 $& $ X_{0}=x $ & $X_{n}=x$\\
+ &$F=1 $& $ Y_{0}=y $ &  $Y_{n}=y+ x\times z$\\
+ &$Z_{n} \Rightarrow 0 $& $ Z_{0}=z $ &  $Z_{n}=0$\\
+ \hline
+\multirow{3}{*}{Vectoring Mode} &$ |Z_{n}|<2 $& $ X_{0}=x $ & $X_{n}=x$\\
+ &$F=1 $& $ Y_{0}=y $ &  $Y_{n}=0$\\
+ &$Y_{n} \Rightarrow 0 $& $ Z_{0}=z $ &  $Z_{n}=z+y/x$\\ 
+ \hline
+\end{tabular}
+
+
+\begin{tabular}{ |l|l|l|l| }
+\hline
+\multicolumn{4}{ |c| }{Hyperbolic Coordinate System} \\
+\hline
+\multicolumn{2}{ |c| }{Mode} & Iteration 0 & Iteration n \\ \hline
+\multirow{9}{*}{Rotation Mode} && $ X_{0}=x $ & $X_{n}=F\times [x \times cosh(a) + y\times sinh(a)]$\\
+ &$ |Z_{0}|<1.11 $& $ Y_{0}=y $ &  $Y_{n}=F \times [x\times sin(a)  y\times cos(a)]$\\
+ &  & $ Z_{0}=a $ &  $Z_{n}=0$\\ \cline{3-4}
+ &   &  $X_{0}=1/F $ & $X_{n}=cosh(a) $\\
+ & $F \approx 0.82 $& $Y_{0}=0 $ & $Y_{n}=sinh(a) $\\
+ &   & $Z_{0}=a $ &$Z_{n}=0 $\\ \cline{3-4}
+  &   &  $X_{0}=b/F $ & $X_{n}=b^a $\\
+ & $Z_{n} \Rightarrow 0 $& $Y_{0}=b/F $ & $Y_{n}=b^a $\\
+ &   & $Z_{0}=a $ &$Z_{n}=0 $\\
+ \hline
+\multirow{18}{*}{Vectoring Mode} && $ X_{0}=x $ & $X_{n}=F\times [x \times cosh(a) + y\times sinh(a)]$\\
+ && $ Y_{0}=y $ &  $X_{n}=F\times [x \times sinh(a) + y\times cosh(a)]$\\
+ &  & $ Z_{0}=z $ &  $Z_{n}=z+tan(y/x)$\\ \cline{3-4}
+ &   &  $X_{0}=1 $ &  $X_{n}=F \times \sqrt{1+a^2}$\\
+ & $ |Z_{n}|<1.11 $& $Y_{0}=a $ & $Y_{n}=0 $\\
+ &   & $Z_{0}=a $ &$Z_{n}=tan(a) $\\ \cline{3-4}
+  &   &  $X_{0}=a $ & $X_{n}=F \times \sqrt{a^2+1}$\\
+ & & $Y_{0}=0 $ & $Y_{n}=1 $\\
+ &$F \approx 0.82 $ & $Z_{0}=a $ &$Z_{n}=cot(a) $\\
+ \cline{3-4}
+  &   &  $X_{0}=a+b $ & $X_{n}=F \times \sqrt{a^2+1}$\\
+ & & $Y_{0}=0 $ & $Y_{n}=a-b $\\
+ &   & $Z_{0}=a $ &$Z_{n}=cot(a) $\\
+ \cline{3-4}
+  &  $Y_{n} \Rightarrow 0 $ &  $X_{0}=a+1 $ & $X_{n}=F \times \sqrt{a^2+1}$\\
+ & & $Y_{0}=a-1 $ & $Y_{n}=0 $\\
+ &   & $Z_{0}=a $ &$Z_{n}=cot(a) $\\
+ \cline{3-4}
+  &   &  $X_{0}=a+1/4 $ & $X_{n}=F \times \sqrt{a^2+1}$\\
+ & & $Y_{0}=a-1/4 $ & $Y_{n}=0 $\\
+ &   & $Z_{0}=a $ &$Z_{n}=cot(a) $\\
+ \hline
+\end{tabular}
+
+
+\end{document}
+
+\begin{document}\[Hyperbolic\begin{cases}A_{n}=tan(\frac{1}{2^n}),& \text{n from 1}\\M=-1,\\F_{n}=\sqrt{1-\frac{1}{2^(2\times n)}}\end{cases}\]\end{document}
