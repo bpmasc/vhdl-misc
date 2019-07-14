@@ -30,7 +30,7 @@ architecture rtl of fib_seq is
 	signal r_cnt : integer;
 
 begin
-
+ 
 	--! assert
 	assert gen_sequence_length < 12 report "[Error] Sequence length invalid." severity error;
 	assert gen_output_length < 17 report "[Error] Output length invalid." severity error;

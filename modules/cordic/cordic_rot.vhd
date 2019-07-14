@@ -1,3 +1,4 @@
+--! Standard IEEE library and packages
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;		  	 	   
@@ -56,26 +57,9 @@ architecture rtl of cordic_rot is
     signal r_Y : signed(gen_size-1 downto 0);
     signal r_Z : signed(gen_size-1 downto 0);
     signal r_iteration : integer;
-    signal r_debug_state : integer;
 
-  constant tan_lkp1 : int16_array_t := (
-    to_signed(11520, gen_size),
-    to_signed(6801, gen_size),
-    to_signed(3595, gen_size),
-    to_signed(1824, gen_size),
-    to_signed(916, gen_size),
-    to_signed(458, gen_size),
-    to_signed(229, gen_size),
-    to_signed(117, gen_size),
-    to_signed(57, gen_size),
-    to_signed(29, gen_size),
-    to_signed(14, gen_size),
-    to_signed(7, gen_size),
-    to_signed(4, gen_size),
-    to_signed(2, gen_size),
-    to_signed(1, gen_size),
-    to_signed(0, gen_size));
 
+    --! Lookup table
     constant tan_lkp : int16_array_t := (
 	to_signed(8191, gen_size),
 	to_signed(4835, gen_size),
@@ -125,10 +109,10 @@ architecture rtl of cordic_rot is
 					 --! 2480*gain(16) = 4095 ;)
                     r_X <= to_signed(2480, gen_size);
                     r_Y <= to_signed(0, gen_size);
+                    
                     --! To shift back to quadrant 1
                     if angle > to_unsigned(c_q3,gen_size) then
                         r_Z  <= signed(angle - to_unsigned(c_q3,gen_size));
-                        --r_Z  <= signed(to_unsigned(2**gen_size-1,gen_size) - angle);
                         r_quadrant <= 3;
                     elsif angle > to_unsigned(c_q2,gen_size) then
                         r_Z <= signed(angle - to_unsigned(c_q2,gen_size));
@@ -189,8 +173,5 @@ architecture rtl of cordic_rot is
 
     --! Set valid only when cordic algorithm is done.
     valid <= '1' when r_state = DONE else '0';
-    r_debug_state <= 0 when r_state = IDLE else
-                     1 when r_state = LOAD else
-                     2 when r_state = RUN else
-                     3;
+
 end rtl;
