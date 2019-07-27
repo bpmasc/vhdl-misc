@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;		  	 	   
 
 --! Auxiliary package
-use work.goertzel_common_pkg.all;
+--use work.goertzel_common_pkg.all;
 
 
 --! @author Manuel Mascarenhas
@@ -17,7 +17,7 @@ use work.goertzel_common_pkg.all;
 --! [1] https://courses.cs.washington.edu/courses/cse466/12au/calendar/Goertzel-EETimes.pdf
 entity basic_goertzel is
     generic (
-      gen_block_size : integer := 205; --N
+      gen_block_size : integer := 10; --N
       gen_tone_period : time := 20 ms;
       gen_sampling_period : time := 20 us;
       gen_size : integer := 16
@@ -53,7 +53,7 @@ end basic_goertzel;
 
 architecture rtl of basic_goertzel is
 	
-    constant c_k : integer := gen_iterations*(gen_tone_period/gen_sampling_period); --! not necessary for now
+    constant c_k : integer := gen_block_size*(gen_tone_period/gen_sampling_period); --! not necessary for now
     constant c_coef : integer := 2; --! not necessary for now
 
     type t_goertzel_state is (IDLE, ARITHM, LOAD, SUM_MAGN, DONE);
@@ -74,23 +74,23 @@ architecture rtl of basic_goertzel is
     if rst = '1' then
         r_state <= IDLE;
         r_iteration <= 0;
-        y_out <= to_signed(0, gen_size-1);
-        r_y_out <= to_signed(0, gen_size-1);
-        r_q1 <= to_signed(0, gen_size-1);
-        r_q2 <= to_signed(0, gen_size-1);
-        r_q3 <= to_signed(0, gen_size-1);
-        r_aux_sum <= to_signed(0, gen_size-1);
+        y_out <= to_signed(0, gen_size);
+        r_y_out <= to_signed(0, gen_size);
+        r_q1 <= to_signed(0, gen_size);
+        r_q2 <= to_signed(0, gen_size);
+        r_q0 <= to_signed(0, gen_size);
+        r_aux_sum <= to_signed(0, gen_size);
 
     elsif rising_edge(clk) then
             case r_state is
                 when IDLE =>
                     if sync = '1' then 
                         r_iteration <= 0;
-                        r_q1 <= to_signed(0, gen_size-1);
-                        r_q2 <= to_signed(0, gen_size-1);
-                        r_q3 <= to_signed(0, gen_size-1);
-                        r_y_out <= to_signed(0, gen_size-1);
-                        r_aux_sum <= to_signed(0, gen_size-1);
+                        r_q1 <= to_signed(0, gen_size);
+                        r_q2 <= to_signed(0, gen_size);
+                        r_q0 <= to_signed(0, gen_size);
+                        r_y_out <= to_signed(0, gen_size);
+                        r_aux_sum <= to_signed(0, gen_size);
                         r_state <= LOAD;
                     end if;
 

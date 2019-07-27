@@ -1,0 +1,7 @@
+v 3
+file . "basic_goertzel.vhd" "20190727062812.000" "20190727082819.029":
+  entity basic_goertzel at 2( 40) + 0 on 47;
+  architecture rtl of basic_goertzel at 54( 1670) + 0 on 48;
+file . "goertzel_tb.vhd" "20190727062652.000" "20190727082819.030":
+  entity goertzel_tb at 1( 0) + 0 on 49;
+  architecture rtl of goertzel_tb at 8( 106) + 0 on 50;
