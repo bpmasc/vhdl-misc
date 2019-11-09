@@ -31,10 +31,6 @@ entity basic_goertzel is
       valid : out std_logic);      
 end basic_goertzel;
 
-
-
-
-
     --! Xr = Xin x cos(theta) - Yin x sen(theta)
     --! Yr = Xin x sen(theta) + Yin x cos(theta)
     --! 
