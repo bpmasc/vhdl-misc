@@ -32,8 +32,10 @@ class signal_wd():
 		self.datatype = VCD_DATATYPE_LOGIC
 
 	def add_symbol(self, symbol):
-		self.symbol = symbol
-					
+		if symbol == '$':
+			self.symbol = r'\$'
+		else:
+			self.symbol = symbol		
 
 	def append_data(self, data):
 		self.data.append(data)
@@ -43,9 +45,12 @@ class signal_wd():
 		self.flip = 0
 
 
-	def translate_data(self):
-		if self.data = '.' or self.data='0' or self.data='1':
-			return str(self.data)
+	def translate_data(self,data_val):
+		#print(data_val)
+		if data_val == '.' or data_val == '0' or data_val == '1':
+			return str(data_val)
+		elif data_val == 'u':
+			return 'x'
 		else:
 			return '='
 
@@ -53,18 +58,31 @@ class signal_wd():
 		s = '"'
 		for i, data in enumerate(self.data):
 			if i < len(self.data)-1:
-				s = s + self.translate_data()
+				s = s + self.translate_data(data)
 			else:
-				s = s + self.translate_data() + '"'
+				s = s + self.translate_data(data) + '"'
+		return s
+
+	def bin_str2hex(self, data_in, index):
+		try:
+			s = str(hex(int(data_in.split('b')[1].strip(),2)))
+		except:
+			self.data[index] = 'u'
+			s =""
 		return s
 
 	def return_data_string(self):
 		s = '"'
 		for i, data in enumerate(self.data):
-			if i < len(self.data)-1:
-				s = s + str(data)+" "
+			if data == '.':
+				if i == len(self.data)-1:
+					s = s + '"'
+				pass
 			else:
-				s = s + str(data) + '"'
+				if i < len(self.data)-1:
+					s = s + self.bin_str2hex(str(data),i) + " "
+				else:
+					s = s + self.bin_str2hex(str(data),i) + '"'
 		return s
 
 	def set_datatype(self, datatype):
@@ -129,9 +147,11 @@ class waveform_obj():
 
 	def add_symbols(self, obj_match):
 		for signal in self.signals:
-			if signal.name == obj_match.group('name'):
+			if signal.name == obj_match.group('name').split('[')[0]:
 				signal.add_symbol(obj_match.group('symbol'))
-				if obj_match.group('size')>1:
+				if obj_match.group('size')=='1':
+					signal.set_datatype(VCD_DATATYPE_LOGIC)
+				else:
 					signal.set_datatype(VCD_DATATYPE_VECTOR)
 
 	def add_data(self, name, obj_match):
@@ -168,9 +188,11 @@ def parse_arg(waveform_obj):
 # @doc https://www.vipinajayakumar.com/parsing-text-with-python/
 # set up regular expressions
 # use https://regexper.com to visualise these if required
+# https://stackoverflow.com/questions/5357460/python-regex-matching-a-parenthesis-within-parenthesis
 def _parse_line(line):
 	vcd_dict = {
-		'var': re.compile(r'var reg (?P<size>.*) (?P<symbol>.*) (?P<name>.*) (.*)end\n'),
+		#'var_vector': re.compile(r'var reg (?P<size>.*) (?P<symbol>.*) (?P<name>.*)\[(.*)\] \$end\n'),
+		'var': re.compile(r'var reg (?P<size>.*) (?P<symbol>.*) (?P<name>.*) \$end\n'),
 		'scope': re.compile(r'scope(.*)end\n'),
 		'endvar': re.compile(r'enddefinitions(.*)end\n')
 	}
@@ -191,21 +213,28 @@ def file_handler(waveform_obj):
 		while line:
 			key, match = _parse_line(line)
 			if key == 'var':
-				#print("key: " + str(key))
-				#print("match: " + str(match.group('symbol') + str(match.group('name'))))
+				print("key: " + str(key))
+				print("match: " + str(match.group('symbol') + " " +str(match.group('name'))))
 				waveform_obj.add_symbols(match)
-
+			if key == 'var_vector':
+				print("Found vector!!!")
 			elif key == 'endvar' or key == 'scope':
 				break
 			line = file.readline()
-		# generate dictionary for desired signals (with symbbols)
 		
+		# generate dictionary for desired signals (with symbbols)
+		while line:
+			key, match = _parse_line(line)
+			if key == 'endvar':
+				break
+			line = file.readline()
+
 		dic = waveform_obj.gen_dict()
 
-		line_data = file.readline()
-		while line_data:
+		line = file.readline()
+		while line:
 			#print line_data[0]
-			if line_data[0] == '#':
+			if line[0] == '#':
 				iterations=iterations+1
 				if iterations > 0:
 					waveform_obj.check_flips()
@@ -214,11 +243,11 @@ def file_handler(waveform_obj):
 				#pass
 			else:
 				for key, rx in dic.items():
-					match = rx.search(line_data)
+					match = rx.search(line)
 					if match:
 						waveform_obj.add_data(key, match)
 
-			line_data = file.readline()
+			line = file.readline()
 
 
 # @brief generate waveform
@@ -235,22 +264,24 @@ def gen_wavedrom_render(waveform_obj):
 
 	render_str = """{ "signal": ["""
 	for i, signals in enumerate(w_obj.signals):
-		if signals.datatype = VCD_DATATYPE_LOGIC:
+		if signals.datatype == VCD_DATATYPE_LOGIC:
+			str_wave=signals.return_wave_string()
 			if i < len(w_obj.signals)-1:
-				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+"""},"""
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+str_wave+"""},"""
 			else:
-				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+"""}]}"""
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+str_wave+"""}]}"""
 		else:
+			str_data=signals.return_data_string()
+			str_wave=signals.return_wave_string()
 			if i < len(w_obj.signals)-1:
-				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+""",  "data":"""+signals.return_data_string()+"""},"""
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+str_wave+""",  "data":"""+str_data+"""},"""
 			else:
-				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+""",  "data":"""+signals.return_data_string()+"""}]}"""
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+str_wave+""",  "data":"""+str_data+"""}]}"""
 		
 
 		#print(signals.name+" "+signals.symbol+" "+str(signals.data))
 
-	print(render_str)
-
+	#print(render_str)
 
 	# generate .svg file
 	svg = wavedrom.render(render_str)
@@ -265,8 +296,8 @@ def gen_wavedrom_render(waveform_obj):
 
 if __name__=="__main__":
 	w_obj = waveform_obj()
-	# convert .svg to .jpeg?
 	parse_arg(w_obj)
 	file_handler(w_obj)
 	waveform_svg = gen_wavedrom_render(w_obj)
+	# convert .svg to .jpeg?
 
