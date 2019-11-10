@@ -10,6 +10,8 @@ import IPython
 #	python vcd2waveform.py filename -s (signals) -r (enable rising edge) -f (enable falling edge) -n (number of cycles)
 #	z.B. python goertzel_tb.vcd -s clk cs mosi miso -r -f -n 25
 
+# https://wavedrom.com/tutorial.html
+
 MAX_N_CYCLES = 30
 STD_N_CYCLES = 20
 MAX_N_SIGNALS = 8
@@ -46,10 +48,9 @@ class signal_wd():
 
 
 	def translate_data(self,data_val):
-		#print(data_val)
 		if data_val == '.' or data_val == '0' or data_val == '1':
 			return str(data_val)
-		elif data_val == 'u':
+		elif data_val == 'u' or data_val == 'X':
 			return 'x'
 		else:
 			return '='
@@ -172,15 +173,14 @@ def parse_arg(waveform_obj):
 	# Get the arguments from the command-line except the filename
 	# Construct the argument parser
 	ap = argparse.ArgumentParser()
-
 	# Add the arguments to the parser
 	ap.add_argument('filename', help="filename")
 	ap.add_argument("-s", "--signals", required=True, help="signals",nargs='*')
 	ap.add_argument("-r", "--rising_edge", required=False, 	nargs='?', default=False, help="enable rising edge")
 	ap.add_argument("-f", "--falling_edge", required=False, nargs='?', default=False, help="enable falling edge")
 	ap.add_argument("-n", "--n_cycles", type=int, default=20, required=False, help="number of cycles")
+	#ap.add_argument("-h", "--hscale", type=int, default=3, required=False, help="horizontal scale")
 	args = vars(ap.parse_args())
-
 	waveform_obj.load_args(args['signals'], str(args['filename']), args['rising_edge'], args['falling_edge'], args['n_cycles'])
 
 
@@ -196,7 +196,6 @@ def _parse_line(line):
 		'scope': re.compile(r'scope(.*)end\n'),
 		'endvar': re.compile(r'enddefinitions(.*)end\n')
 	}
-
 	for key, rx in vcd_dict.items():
 		match = rx.search(line)
 		if match:
@@ -246,7 +245,6 @@ def file_handler(waveform_obj):
 					match = rx.search(line)
 					if match:
 						waveform_obj.add_data(key, match)
-
 			line = file.readline()
 
 
@@ -259,7 +257,6 @@ def file_handler(waveform_obj):
 # """{ "name": "DQS",  "wave": "z.......0.....z." },"""+
 # """{ "name": "DQ",   "wave": "z.........z.....", "data": "D0 D1 D2 D3" }"""+
 #"""]}""")
-
 def gen_wavedrom_render(waveform_obj):
 
 	render_str = """{ "signal": ["""
@@ -277,12 +274,9 @@ def gen_wavedrom_render(waveform_obj):
 				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+str_wave+""",  "data":"""+str_data+"""},"""
 			else:
 				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+str_wave+""",  "data":"""+str_data+"""}]}"""
-		
+		#print(signals.name+" "+signals.symbol+" "+str(signals.data))	
 
-		#print(signals.name+" "+signals.symbol+" "+str(signals.data))
-
-	#print(render_str)
-
+	print(render_str)
 	# generate .svg file
 	svg = wavedrom.render(render_str)
 	# try to save file
@@ -292,12 +286,13 @@ def gen_wavedrom_render(waveform_obj):
 		print("File succefully generated as "+svg_filename)
 	except:
 		print("Failed to generate file.")
-	return svg
+	
+	#return svg
 
 if __name__=="__main__":
 	w_obj = waveform_obj()
 	parse_arg(w_obj)
 	file_handler(w_obj)
-	waveform_svg = gen_wavedrom_render(w_obj)
+	gen_wavedrom_render(w_obj)
 	# convert .svg to .jpeg?
 

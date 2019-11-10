@@ -1,0 +1,48 @@
+$date
+  Sun Apr 28 23:51:45 2019
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$var reg 1 ! xor_in1 $end
+$var reg 1 " xor_in2 $end
+$var reg 1 # xor_out $end
+$scope module inst_xor_logic $end
+$var reg 1 $ xor_in1 $end
+$var reg 1 % xor_in2 $end
+$var reg 1 & xor_out $end
+$upscope $end
+$enddefinitions $end
+#0
+X!
+X"
+X#
+X$
+X%
+X&
+#1000000
+0!
+0"
+0#
+0$
+0%
+0&
+#2000000
+1"
+1#
+1%
+1&
+#3000000
+1!
+0"
+1$
+0%
+#4000000
+1"
+0#
+1%
+0&
+#5000000
