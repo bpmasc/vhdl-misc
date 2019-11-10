@@ -1,4 +1,4 @@
-import numpy
+#import numpy
 import argparse
 import wavedrom
 import re
@@ -42,14 +42,33 @@ class signal_wd():
 	def reset_flip(self):
 		self.flip = 0
 
+
+	def translate_data(self):
+		if self.data = '.' or self.data='0' or self.data='1':
+			return str(self.data)
+		else:
+			return '='
+
+	def return_wave_string(self):
+		s = '"'
+		for i, data in enumerate(self.data):
+			if i < len(self.data)-1:
+				s = s + self.translate_data()
+			else:
+				s = s + self.translate_data() + '"'
+		return s
+
 	def return_data_string(self):
 		s = '"'
 		for i, data in enumerate(self.data):
 			if i < len(self.data)-1:
-				s = s + str(data)
+				s = s + str(data)+" "
 			else:
 				s = s + str(data) + '"'
 		return s
+
+	def set_datatype(self, datatype):
+		self.datatype = datatype
 
 # https://docs.python.org/3/tutorial/classes.html
 class waveform_obj():
@@ -112,7 +131,9 @@ class waveform_obj():
 		for signal in self.signals:
 			if signal.name == obj_match.group('name'):
 				signal.add_symbol(obj_match.group('symbol'))
-	
+				if obj_match.group('size')>1:
+					signal.set_datatype(VCD_DATATYPE_VECTOR)
+
 	def add_data(self, name, obj_match):
 		for signal in self.signals:
 			if signal.name == name:
@@ -175,7 +196,6 @@ def file_handler(waveform_obj):
 				waveform_obj.add_symbols(match)
 
 			elif key == 'endvar' or key == 'scope':
-				#print("key: " + str(key))
 				break
 			line = file.readline()
 		# generate dictionary for desired signals (with symbbols)
@@ -210,17 +230,28 @@ def file_handler(waveform_obj):
 # """{ "name": "DQS",  "wave": "z.......0.....z." },"""+
 # """{ "name": "DQ",   "wave": "z.........z.....", "data": "D0 D1 D2 D3" }"""+
 #"""]}""")
+
 def gen_wavedrom_render(waveform_obj):
 
 	render_str = """{ "signal": ["""
 	for i, signals in enumerate(w_obj.signals):
-		if i < len(w_obj.signals)-1:
-			render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_data_string()+"""},"""
+		if signals.datatype = VCD_DATATYPE_LOGIC:
+			if i < len(w_obj.signals)-1:
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+"""},"""
+			else:
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+"""}]}"""
 		else:
-			render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_data_string()+"""}]}"""
+			if i < len(w_obj.signals)-1:
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+""",  "data":"""+signals.return_data_string()+"""},"""
+			else:
+				render_str = render_str + """{ "name":""" +'"'+signals.name+"""" ,  "wave":"""+signals.return_wave_string()+""",  "data":"""+signals.return_data_string()+"""}]}"""
+		
+
 		#print(signals.name+" "+signals.symbol+" "+str(signals.data))
 
 	print(render_str)
+
+
 	# generate .svg file
 	svg = wavedrom.render(render_str)
 	# try to save file
