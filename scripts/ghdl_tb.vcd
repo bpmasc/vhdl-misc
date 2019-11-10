@@ -23,6 +23,7 @@ $var integer 32 , r_cnt $end
 $var reg 16 - r_local[15:0] $end
 $upscope $end
 $enddefinitions $end
+
 #0
 1!
 1"
@@ -67,3 +68,4 @@ b0000000000000011 )
 b0000000000000010 *
 b0000000000000101 +
 b11 ,
+#1400000000
