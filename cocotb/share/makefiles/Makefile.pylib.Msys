@@ -27,31 +27,32 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
+# All common python related rules
 
-PWD=$(shell pwd)
-
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
+# if not explicitly set, auto-detect python dir from system path
+ifeq ($(PYTHON_DIR),)
+	PYTHON_DIR ?= $(shell dirname $(shell which python))
 endif
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
+# make sure python dir was set properly
+ifeq ($(PYTHON_DIR),)
+	$(error "Path to Python directory must be included in system path or defined in PYTHON_DIR environment variable")
 endif
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
+PYTHON_BIN?=$(PYTHON_DIR)/python.exe
 
-OTHERDIR=../../../makefiles
+# We might work with other Python versions
+LOCAL_PYTHON_VERSION?=$(shell $(PYTHON_BIN) -c 'import distutils.sysconfig; print( distutils.sysconfig.get_python_version() )')
+PYTHON_DYNLIBDIR:=$(shell $(PYTHON_BIN) -c 'from distutils import sysconfig; print( sysconfig.get_config_var("DESTSHARED") )')
+PYTHON_LIBDIR:=$(shell $(PYTHON_BIN) -c 'from distutils import sysconfig; print( sysconfig.get_config_var("LIBDIR") )')
+ifeq ($(PYTHON_LIBDIR),None)
+    PYTHON_LIBDIR=$(PYTHON_DIR)/libs
+endif
 
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
+period := .
+empty :=
+PYTHON_VERSION=$(subst $(period),$(empty),$(LOCAL_PYTHON_VERSION))
+PYTHON_INCLUDEDIR := $(shell $(PYTHON_BIN) -c 'import distutils.sysconfig; print( distutils.sysconfig.get_python_inc() )')
 
+PYLIBS = -lPython$(PYTHON_VERSION)
+PYTHON_DYN_LIB = Python$(PYTHON_VERSION).dll

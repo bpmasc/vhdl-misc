@@ -27,31 +27,22 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
+# All common pyhon related rules
 
-PWD=$(shell pwd)
+NATIVE_ARCH=$(shell uname -m)
+ARCH?=$(NATIVE_ARCH)
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
+include $(COCOTB_SHARE_DIR)/makefiles/Makefile.pylib.$(OS)
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
+export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):$(PYTHON_LIBDIR)
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
-
-OTHERDIR=../../../makefiles
-
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
+#debug::
+#	@echo "Debug from Makefile.pylib"
+#	@echo -e "\tUsing PYTHON_VERSION=$(PYTHON_VERSION)"
+#	@echo -e "\tUsing PYTHON_LIBDIR=$(PYTHON_LIBDIR)"
+#	@echo -e "\tUsing PYTHON_DYN_LIB=$(PYTHON_DYN_LIB)"
+#	@echo -e "\tUsing PYTHON_DYNLIBDIR=$(PYTHON_DYNLIBDIR)"
+#	@echo -e "\tUsing PYTHON_INCLUDEDIR=$(PYTHON_INCLUDEDIR)"
+#	file $(PYTHON_LIBDIR)/$(PYTHON_DYN_LIB)
+#	file -L $(PYTHON_LIBDIR)/$(PYTHON_DYN_LIB)
 

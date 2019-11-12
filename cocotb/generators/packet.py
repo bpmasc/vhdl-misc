@@ -1,4 +1,5 @@
-###############################################################################
+#!/usr/bin/env python
+
 # Copyright (c) 2013 Potential Ventures Ltd
 # Copyright (c) 2013 SolarFlare Communications Inc
 # All rights reserved.
@@ -25,33 +26,51 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
 
-PWD=$(shell pwd)
+"""
+    Collection of Ethernet Packet generators to use for testdata generation
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
+    Most generators take the keyword argument "payload" which can be
+    used to control the payload contents if required.  Defaults to random data.
+"""
+import random
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
+from scapy.all import Ether, IP, UDP
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
+# Supress SCAPY warning messages
+import logging
+logging.getLogger("scapy").setLevel(logging.ERROR)
 
-OTHERDIR=../../../makefiles
+from cocotb.decorators import public
+from cocotb.generators.byte import get_bytes, random_data
 
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
+_default_payload = random_data
 
+
+# UDP packet generators
+@public
+def udp_all_sizes(max_size=1500, payload=_default_payload()):
+    """UDP packets of every supported size"""
+    header = Ether() / IP() / UDP()
+
+    for size in range(0, max_size - len(header)):
+        yield header / get_bytes(size, payload)
+
+
+@public
+def udp_random_sizes(npackets=100, payload=_default_payload()):
+    """UDP packets with random sizes"""
+    header = Ether() / IP() / UDP()
+    max_size = 1500 - len(header)
+
+    for pkt in range(npackets):
+        yield header / get_bytes(random.randint(0, max_size), payload)
+
+
+# IPV4 generator
+@public
+def ipv4_small_packets(npackets=100, payload=_default_payload()):
+    """Small (<100bytes payload) IPV4 packets"""
+    for pkt in range(npackets):
+        yield Ether() / IP() / get_bytes(random.randint(0, 100), payload)

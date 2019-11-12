@@ -27,31 +27,16 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
+include $(COCOTB_SHARE_DIR)/makefiles/Makefile.inc
 
-PWD=$(shell pwd)
+INCLUDES	+=
+SRCS		:= cocotb_utils.c
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
+LIB_NAME	:= libcocotbutils
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
+all: $(LIB_DIR)/$(LIB_NAME).$(LIB_EXT)
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
+clean:
+	-@rm -rf $(OBJ_DIR)
 
-OTHERDIR=../../../makefiles
-
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
-
+include $(COCOTB_SHARE_DIR)/makefiles/Makefile.rules

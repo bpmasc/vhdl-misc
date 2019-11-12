@@ -27,31 +27,26 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
 
-PWD=$(shell pwd)
+# Set of common rules for building documentation
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
+# Assumes a subfolder called "documentation" containing:
+# JSON waveforms named xxx.wavedrom
+# Diagrams in SVG format named xxx.svg
+# Markdown documents named xxx.md
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
+# Find the dependencies
+WAVEFORMS = $(wildcard documentation/*.wavedrom)
+DIAGRAMS  = $(wildcard documentation/*.svg)
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
+# Define the default target as the documentation/$(dirname).html
+documentation/$(shell basename $(shell pwd)).html :
 
-OTHERDIR=../../../makefiles
 
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
+documentation/%.html: documentation/%.md $(WAVEFORMS) $(DIAGRAMS)
+	cd documentation && python -m markdown -x wavedrom $(notdir $<) > $(notdir $@)
+
+clean::
+	rm -rf documentation/*.html
+
 

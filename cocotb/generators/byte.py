@@ -1,4 +1,5 @@
-###############################################################################
+#!/usr/bin/env python
+
 # Copyright (c) 2013 Potential Ventures Ltd
 # Copyright (c) 2013 SolarFlare Communications Inc
 # All rights reserved.
@@ -25,33 +26,44 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
 
-PWD=$(shell pwd)
+"""
+    Collection of generators for creating byte streams
+"""
+import random
+from cocotb.decorators import public
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
+@public
+def get_bytes(nbytes, generator):
+    """Get nbytes from generator"""
+    result = ""
+    for i in range(nbytes):
+        result += next(generator)
+    return result
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
 
-OTHERDIR=../../../makefiles
+@public
+def random_data():
+    """Random bytes"""
+    while True:
+        yield chr(random.randint(0, 255))
 
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
 
+@public
+def incrementing_data(increment=1):
+    """Incrementing bytes"""
+    val = 0
+    while True:
+        yield chr(val)
+        val += increment
+        val = val & 0xFF
+
+
+@public
+def repeating_bytes(pattern="\x00"):
+    """Repeat a pattern of bytes"""
+    while True:
+        for byte in pattern:
+            yield byte

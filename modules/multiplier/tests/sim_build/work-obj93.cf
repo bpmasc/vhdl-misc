@@ -1,0 +1,4 @@
+v 4
+file / "/mnt/c/Users/User/Desktop/GIT/vhdl-misc/modules/multiplier/tests/../hdl/mult_x_y.vhd" "9da3638578259fa6f3413168487145d9c375b3fa" "20191112153002.062":
+  entity mult_x_y at 2( 22) + 0 on 11;
+  architecture rtl of mult_x_y at 27( 508) + 0 on 12;

@@ -1,4 +1,3 @@
-###############################################################################
 # Copyright (c) 2013 Potential Ventures Ltd
 # Copyright (c) 2013 SolarFlare Communications Inc
 # All rights reserved.
@@ -25,33 +24,15 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
+import cherrypy
+import dowser
 
-PWD=$(shell pwd)
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
-
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
-
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
-
-OTHERDIR=../../../makefiles
-
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
-
+def start(port):
+    cherrypy.tree.mount(dowser.Root())
+    cherrypy.config.update({
+        'environment': 'embedded',
+        'server.socket_port': port
+    })
+    cherrypy.engine.start()

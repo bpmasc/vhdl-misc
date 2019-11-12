@@ -27,31 +27,23 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
-TOPLEVEL_LANG ?= vhdl
+include $(COCOTB_SHARE_DIR)/makefiles/Makefile.inc
 
-PWD=$(shell pwd)
+INCLUDES    +=
+GCC_ARGS    +=
+LIBS        := -lcocotbutils -lgpi -lgpilog $(PYLIBS)
+LD_PATH     := -L$(LIB_DIR)
+LIB_NAME    := libsim
 
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
-WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
+SRCS        := simulatormodule.c
 
-ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
-else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
-else
-    $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
-endif
+CLIBS       += $(LIB_DIR)/$(LIB_NAME)
 
-TOPLEVEL := mult_x_y
-MODULE   := test_multiplier
+$(LIB_DIR)/simulator.$(PY_EXT): $(LIB_DIR)/$(LIB_NAME).$(LIB_EXT)
+	ln -sf $(LIB_NAME).$(LIB_EXT) $@
 
-OTHERDIR=../../../makefiles
+clean:
+	-@rm -rf $(LIB_DIR)/simulator.$(LIB_EXT)
+	-@rm -rf $(LIB_DIR)/$(LIB_NAME).$(LIB_EXT)
 
-include $(OTHERDIR)/Makefile.inc
-include $(OTHERDIR)/Makefile.sim
-
+include $(COCOTB_SHARE_DIR)/makefiles/Makefile.rules
