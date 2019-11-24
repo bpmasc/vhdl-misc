@@ -9,7 +9,8 @@ use IEEE.std_logic_1164.all;
 --! TODO brief
 entity mult_x_y is
     generic( 
-        N: integer := 16
+        N: integer := 16,
+        gen_deterministic : boolean := True
     );
     port( 
         clk : in std_logic;
@@ -22,7 +23,7 @@ entity mult_x_y is
 end;
 
 
-
+   
 --! TODO brief
 architecture rtl of mult_x_y is
     

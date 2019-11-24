@@ -3,7 +3,7 @@ import argparse
 import wavedrom
 import re
 import pandas as pd
-import IPython
+
 
 # compute aguments
 #	command example:
