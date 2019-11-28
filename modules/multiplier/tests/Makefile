@@ -40,14 +40,14 @@ PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
 endif
 
 ifeq ($(TOPLEVEL_LANG),verilog)
-    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x_y.v
+    VERILOG_SOURCES = $(WPWD)/../hdl/mult_x1_x2_y.v
 else ifeq ($(TOPLEVEL_LANG),vhdl)
-    VHDL_SOURCES = $(WPWD)/../hdl/mult_x_y.vhd
+    VHDL_SOURCES = $(WPWD)/../hdl/mult_x1_x2_y.vhd
 else
     $(error "A valid value (verilog or vhdl) was not provided for TOPLEVEL_LANG=$(TOPLEVEL_LANG)")
 endif
 
-TOPLEVEL := mult_x_y
+TOPLEVEL := mult_x1_x2_y
 MODULE   := test_multiplier
 
 OTHERDIR=../../../makefiles
