@@ -5,11 +5,15 @@ use IEEE.numeric_std.all;
 --! 
 package mult_common_pkg is
 
-	subtype t_array_3_s8 is (0 downto 2) of signed(7 downto 0);
-	subtype t_array_3_s16 is (0 downto 2) of signed(15 downto 0);
-	type t_matrix_3_3_s16 is (0 downto 2) of t_array_3_15;
-	subtype t_array_3_s32 is (0 downto 2) of signed(31 downto 0);
-	type t_matrix_3_3_s32 is (0 downto 2) of t_array_3_32;
+	type t_array_3_s8 is array (0 to 2) of signed(7 downto 0);
+	type t_array_3_s16 is array (0 to 2) of signed(15 downto 0);
+	type t_matrix_3_3_s16 is array (0 to 2) of t_array_3_s16;
+	type t_array_3_s32 is array (0 to 2) of signed(31 downto 0);
+	type t_matrix_3_3_s32 is array (0 to 2) of t_array_3_s32;
+
+--! TODO!!!
+-- type INT_ARRAY is array (integer range <>) of integer;
+-- variable INT_TABLE: INT_ARRAY(0 to 9);
 
 	function shift_right_signed (x : signed; len : integer; n : integer)
                    return signed;

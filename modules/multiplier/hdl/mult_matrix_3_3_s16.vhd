@@ -71,7 +71,14 @@ architecture rtl of mult_matrix_3_3_s16 is
     signal r_z2_c : signed(31 downto 0);
     --! TODO description
     signal r_z3_c : signed(31 downto 0);
-    
+ 
+    signal r_start_mult_a : std_logic;
+    signal r_valid_a : std_logic;
+    signal r_start_mult_b : std_logic;
+    signal r_valid_b : std_logic;
+    signal r_start_mult_c : std_logic;
+    signal r_valid_c : std_logic;
+
     --! TODO description
     signal r_row_pointer : integer range 0 to 7 := 0;
     --!
@@ -95,9 +102,8 @@ begin
 -- o32 = a31*b21 + a32*b22 + a33*b32
 -- o33 = a31*b31 + a32*b23 + a33*b33
 
-
 inst_mult_a : entity work.mult_x1_x2_x3_y
-    port( 
+    port map( 
         clk => clk,
         reset => reset,
         start => r_start_mult_a,
@@ -111,7 +117,7 @@ inst_mult_a : entity work.mult_x1_x2_x3_y
         valid => r_valid_a); 
 
 inst_mult_b : entity work.mult_x1_x2_x3_y
-    port( 
+    port map( 
         clk => clk,
         reset => reset,
         start => r_start_mult_b,
@@ -124,8 +130,8 @@ inst_mult_b : entity work.mult_x1_x2_x3_y
         z3  => r_z3_b,
         valid => r_valid_b);
 
-inst_mult_a : entity work.mult_x1_x2_x3_y
-    port( 
+inst_mult_c : entity work.mult_x1_x2_x3_y
+    port map( 
         clk => clk,
         reset => reset,
         start => r_start_mult_c,
@@ -156,8 +162,8 @@ inst_mult_a : entity work.mult_x1_x2_x3_y
                 r_start_mult_b <= '0';
                 r_start_mult_c <= '0';
                 r_row_pointer <= 0;
-                m_out <= (others => (others => '0'));
-                r_m_out <= (others => (others => '0'));
+                m_out <= (others =>(others => (others => '0')));
+                r_m_out <= (others =>(others => (others => '0')));
                 r_state <= IDLE;
 
             elsif rising_edge(clk) then
@@ -167,20 +173,20 @@ inst_mult_a : entity work.mult_x1_x2_x3_y
                         r_row_pointer <= 0;
                         if start = '1' then
                             --! load multiplier A
-                            r_x1_a <= m_in_2[0][0];
-                            r_x2_a <= m_in_2[0][1];
-                            r_x3_a <= m_in_2[0][2];
-                            r_y_a <= m_in_1[r_row_pointer][0];
+                            r_x1_a <= m_in_2(0)(0);
+                            r_x2_a <= m_in_2(0)(1);
+                            r_x3_a <= m_in_2(0)(2);
+                            r_y_a <= m_in_1(r_row_pointer)(0);
                             --! load multiplier B
-                            r_x1_b <= m_in_2[1][0];
-                            r_x2_b <= m_in_2[1][1];
-                            r_x3_b <= m_in_2[1][2];
-                            r_y_b <= m_in_1[r_row_pointer][1];
+                            r_x1_b <= m_in_2(1)(0);
+                            r_x2_b <= m_in_2(1)(1);
+                            r_x3_b <= m_in_2(1)(2);
+                            r_y_b <= m_in_1(r_row_pointer)(1);
                             --! load multiplier C
-                            r_x1_c <= m_in_2[2][0];
-                            r_x2_c <= m_in_2[2][1];
-                            r_x3_c <= m_in_2[2][2];
-                            r_y_c <= m_in_1[r_row_pointer][2];
+                            r_x1_c <= m_in_2(2)(0);
+                            r_x2_c <= m_in_2(2)(1);
+                            r_x3_c <= m_in_2(2)(2);
+                            r_y_c <= m_in_1(r_row_pointer)(2);
                             --! start multipliers
                             r_start_mult_a <= '1';
                             r_start_mult_b <= '1';
@@ -196,9 +202,9 @@ inst_mult_a : entity work.mult_x1_x2_x3_y
                             r_start_mult_b <= '0';
                             r_start_mult_c <= '0';
                             --! sum and load output
-                            r_m_out[r_row_pointer][0] <= r_z1_a + r_z1_b + r_z1_c;
-                            r_m_out[r_row_pointer][1] <= r_z2_a + r_z2_b + r_z2_c;
-                            r_m_out[r_row_pointer][2] <= r_z3_a + r_z3_b + r_z3_c;
+                            r_m_out(r_row_pointer)(0) <= r_z1_a + r_z1_b + r_z1_c;
+                            r_m_out(r_row_pointer)(1) <= r_z2_a + r_z2_b + r_z2_c;
+                            r_m_out(r_row_pointer)(2) <= r_z3_a + r_z3_b + r_z3_c;
                             if r_row_pointer < 2 then
                                 r_row_pointer <= r_row_pointer + 1;
                                 r_state <= MULTIPLY;
@@ -214,20 +220,20 @@ inst_mult_a : entity work.mult_x1_x2_x3_y
                         r_start_mult_b <= '1';
                         r_start_mult_c <= '1';
                         --! load multiplier A
-                        r_x1_a <= m_in_2[0][0];
-                        r_x2_a <= m_in_2[0][1];
-                        r_x3_a <= m_in_2[0][2];
-                        r_y_a <= m_in_1[r_row_pointer][0];
+                        r_x1_a <= m_in_2(0)(0);
+                        r_x2_a <= m_in_2(0)(1);
+                        r_x3_a <= m_in_2(0)(2);
+                        r_y_a <= m_in_1(r_row_pointer)(0);
                         --! load multiplier B
-                        r_x1_b <= m_in_2[1][0];
-                        r_x2_b <= m_in_2[1][1];
-                        r_x3_b <= m_in_2[1][2];
-                        r_y_b <= m_in_1[r_row_pointer][1];
+                        r_x1_b <= m_in_2(1)(0);
+                        r_x2_b <= m_in_2(1)(1);
+                        r_x3_b <= m_in_2(1)(2);
+                        r_y_b <= m_in_1(r_row_pointer)(1);
                         --! load multiplier C
-                        r_x1_c <= m_in_2[2][0];
-                        r_x2_c <= m_in_2[2][1];
-                        r_x3_c <= m_in_2[2][2];
-                        r_y_c <= m_in_1[r_row_pointer][2];
+                        r_x1_c <= m_in_2(2)(0);
+                        r_x2_c <= m_in_2(2)(1);
+                        r_x3_c <= m_in_2(2)(2);
+                        r_y_c <= m_in_1(r_row_pointer)(2);
                         r_state <= WAIT_MULT;
 
                     when DONE =>

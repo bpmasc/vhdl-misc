@@ -9,9 +9,8 @@ use IEEE.std_logic_1164.all;
 --! TODO brief
 entity mult_x1_x2_x3_y is
     generic( 
-        N: integer := 16,
-        gen_deterministic : boolean := True
-    );
+        N : integer := 16;
+        gen_deterministic : boolean := True);
     port( 
         clk : in std_logic;
         reset : in std_logic;
@@ -34,6 +33,8 @@ architecture rtl of mult_x1_x2_x3_y is
     --! TODO description
     type t_fsm is (IDLE, MULTIPLY, FLIP, DONE);
     --! TODO description
+    signal r_state : t_fsm;
+    --! TODO description
     signal r_x1 : signed(2*N-1 downto 0);
     --! TODO description
     signal r_x2 : signed(2*N-1 downto 0);
@@ -47,8 +48,6 @@ architecture rtl of mult_x1_x2_x3_y is
     signal r_z2 : signed(2*N-1 downto 0);
     --! TODO description
     signal r_z3 : signed(2*N-1 downto 0);
-    --! TODO description
-    signal r_state : t_fsm;
     --! TODO description
     signal r_cnt : integer range 0 to N+1;--    : integer;
     --! TODO description
