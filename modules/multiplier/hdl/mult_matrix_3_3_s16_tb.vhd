@@ -98,6 +98,17 @@ begin
 	    wait until clk='1';
 	    r_start <= '0';
 
+
+		wait until r_valid='1';
+		wait until clk='1';
+		wait until clk='0';
+		r_m_in_1 <= ((c_2,c_2,c_2), (c_2,c_2,c_2), (c_2,c_2,c_2));
+		r_m_in_2 <= ((-c_1,-c_1,-c_1), (-c_1,-c_1,-c_1), (-c_1,-c_1,-c_1));
+	    r_start <= '1';
+	    wait until clk='1';
+	    r_start <= '0';
+
+
 	    wait;
 	end process;
 
