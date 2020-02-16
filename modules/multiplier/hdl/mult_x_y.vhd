@@ -9,7 +9,7 @@ use IEEE.std_logic_1164.all;
 --! TODO brief
 entity mult_x_y is
     generic( 
-        N: integer := 16,
+        N: integer := 16;
         gen_deterministic : boolean := True
     );
     port( 
@@ -61,7 +61,7 @@ begin
                         z <= to_signed(0, 2*N);
                         cnt <= 0;  
                         if start = '1' then
-                            r_x <= resize(x, 32);
+                            r_x <= resize(x, 2*N);
                             if y <0 then
                                 r_y <= -y;
                                 r_negative_mult <= '1';
