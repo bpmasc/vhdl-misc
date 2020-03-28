@@ -1,4 +1,4 @@
-library ieee;
+ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
@@ -54,44 +54,12 @@ begin
 	    -- 0
 	    wait until rst='0';
 	    r_start <= '0';
-	    r_theta <= to_unsigned(0,16);
+	    r_theta <= to_unsigned(16383,16); --90
 	    r_start <= '1';
 	    wait until clk='1';
 	    r_start <= '0';
-	    wait for 4 us;
 
-	    -- pi/2
-	    r_theta <= to_unsigned(16382,16);
-	   	r_start <= '1';
-	    wait until clk='1';
-	    r_start <= '0';
-	    wait for 4 us;
-	    
-	    -- pi
-	    -- pi/2
-	    r_theta <= to_unsigned(16389,16);
-	   	r_start <= '1';
-	    wait until clk='1';
-	    r_start <= '0';
-	    wait for 4 us;
-	    -- pi
-	    r_theta <= to_unsigned(32769,16);
-	    r_start <= '1';
-	    wait until clk='1';
-	    wait until clk='0';
-	    r_start <= '0';
-	    wait for 4 us;
-	    -- 3pi/2
-	    r_theta <= to_unsigned(49157,16);
-	    r_start <= '1';
-	    wait until clk='1';
-	    r_start <= '0';
-	    wait for 4 us;
-	    --2pi
-	    r_theta <= to_unsigned(65534,16);
-	    r_start <= '1';
-	    wait until clk='1';
-	    r_start <= '0';
+
 	    wait;
 	end process;
 end rtl;

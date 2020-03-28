@@ -1,7 +1,7 @@
 --! Standard signal package
 library ieee;
-use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.std_logic_1164.all;
 
 entity fib_seq_tb is
 end fib_seq_tb; 
@@ -50,7 +50,7 @@ begin
 	p_reset: process
 	begin
 	  rst <='1';
-	  wait for c_clk_period*2 ns;
+	  wait for c_clk_period*2;
 	  rst <= '0';  
 	  wait;
 	end process;

@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;		  	 	   
 
 --! Auxiliary package
+library work;
 use work.cordic_common_pkg.all;
 
 
@@ -32,15 +33,15 @@ end cordic_rot;
     --! Xin = 1; Yin = 0 ======>  Xr = cos(theta) ; Yr = sen(theta)
     --!
     --! tan(theta) = sen(theta) / cos(theta)
-    --!
-    --! Xr = Xin x cos(theta) - Yin x cos(theta) x tan(theta)
-    --! Yr = Xin x cos(theta) x tan(theta) + Yin x cos(theta)
     --! tan(theta_i) = 2exp(-i)
 
     --! theta_i = arctan(2exp(-i))
     --! d_i 
     --! Iteration (i)  //    d_i   //    X_i   //     Y_i   //      Z_i  
-    --!     -                 -           1            0            
+    --!     -                 -           1         
+    --!
+    --! Xr = Xin x cos(theta) - Yin x cos(theta) x tan(theta)
+    --! Yr = Xin x cos(theta) x tan(theta) + Yin x cos(theta)   0            
 
 architecture rtl of cordic_rot is
 	--! constants
@@ -62,26 +63,26 @@ architecture rtl of cordic_rot is
 
     --! Lookup table
     constant tan_lkp : int16_array_t := (
-	to_signed(8191, gen_size),
-	to_signed(4835, gen_size),
-	to_signed(2555, gen_size),
-	to_signed(1297, gen_size),
-	to_signed(651, gen_size),
-	to_signed(325, gen_size),
-	to_signed(162, gen_size),
-	to_signed(81, gen_size),
-	to_signed(40, gen_size),
-	to_signed(20, gen_size),
-	to_signed(10, gen_size),
-	to_signed(5, gen_size),
-	to_signed(2, gen_size),
-	to_signed(1, gen_size),
-	to_signed(0, gen_size),
-	to_signed(0, gen_size));
- 
+                                        	to_signed(8191, gen_size),
+                                        	to_signed(4835, gen_size),
+                                        	to_signed(2555, gen_size),
+                                        	to_signed(1297, gen_size),
+                                        	to_signed(651, gen_size),
+                                        	to_signed(325, gen_size),
+                                        	to_signed(162, gen_size),
+                                        	to_signed(81, gen_size),
+                                        	to_signed(40, gen_size),
+                                        	to_signed(20, gen_size),
+                                        	to_signed(10, gen_size),
+                                        	to_signed(5, gen_size),
+                                        	to_signed(2, gen_size),
+                                        	to_signed(1, gen_size),
+                                        	to_signed(0, gen_size),
+                                        	to_signed(0, gen_size));
+
   begin
 
-    g_rotating : if gen_rotating generate
+    g_rotating : if gen_rotation generate
          p_cordic : process(rst, clk)  
           begin
             
@@ -109,7 +110,7 @@ architecture rtl of cordic_rot is
                                 
                         when LOAD =>
                              --! 2480*gain(16) = 4095 ;)
-                            r_X <= to_signed(2480, gen_size);
+                            r_X <= to_signed(19897, gen_size); --2480
                             r_Y <= to_signed(0, gen_size);
                             
                             --! To shift back to quadrant 1
@@ -179,7 +180,7 @@ architecture rtl of cordic_rot is
     end generate g_rotating;
 
 
-     g_vectoring : if not gen_rotating generate
+     g_vectoring : if not gen_rotation generate
          p_cordic : process(rst, clk)  
           begin
             
