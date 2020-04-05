@@ -54,7 +54,7 @@ begin
 	    -- 0
 	    wait until rst='0';
 	    r_start <= '0';
-	    r_theta <= to_unsigned(16383,16); --90
+	    r_theta <= to_unsigned(32767,16); --90
 	    r_start <= '1';
 	    wait until clk='1';
 	    r_start <= '0';
