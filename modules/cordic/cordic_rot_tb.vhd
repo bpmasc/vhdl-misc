@@ -1,4 +1,4 @@
- library ieee;
+library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
@@ -17,7 +17,8 @@ architecture rtl of cordic_rot_tb is
     signal r_y_out : signed(15 downto 0);
     signal r_start : std_logic := '0';
     signal r_valid : std_logic;
-
+    signal r_x_small : signed(11 downto 0);
+    signal r_y_small : signed(11 downto 0);
 begin
 
     --! Instatiation DUT
@@ -43,7 +44,7 @@ begin
 	--============================================
 	p_clock: process
 	begin
-	  wait for 40 ns;
+	  wait for 20 ns;
 	  clk <= not clk;
 	end process;
 
@@ -52,14 +53,22 @@ begin
 	p_theta : process
 	begin
 	    -- 0
-	    wait until rst='0';
+	    --wait until rst='0';
 	    r_start <= '0';
-	    r_theta <= to_unsigned(32767,16); --90
+	    r_theta <= r_theta + to_unsigned(32,16);--to_unsigned(32767,16); --90
 	    r_start <= '1';
-	    wait until clk='1';
+	    wait until clk='1' and rst='0';
+	    r_start <= '0';
+	    --! Falling edge from fvalid
+	    wait until r_valid='1';
+	    wait until r_valid='0';
 	    r_start <= '0';
 
-
-	    wait;
 	end process;
+
+
+	--" hard logic
+	r_x_small <= r_x_out(15 downto 4);
+	r_y_small <= r_y_out(15 downto 4);
+
 end rtl;
