@@ -36,6 +36,8 @@ architecture rtl of avalon_mem_tb is
 	signal r_f2h_sdram_readdatavalid : std_logic;
 	signal r_f2h_sdram_read :  std_logic;
     signal r_valid_read :  std_logic;
+	signal r_data_in : t_mem_array(31 downto 0);
+	signal r_data_out : t_mem_array(31 downto 0);
 
 
 
@@ -64,11 +66,7 @@ begin
     	reset => rst,
     	clk => clk,
     	start => r_start,
-    	--data_in : in t_mem_array(2**sel_width - 1 downto 0)(bus_width - 1 downto 0);
-    	data_in_0 => r_data_in_0,
-    	data_in_1 => r_data_in_1,
-    	data_in_2 => r_data_in_2,
-    	data_in_3 => r_data_in_3,
+    	data_in => r_data_in,
     	f2h_sdram_address => r_f2h_sdram_address,    -- address
     	f2h_sdram_burstcount => r_f2h_sdram_burstcount, -- burstcount
     	f2h_sdram_waitrequest => r_f2h_sdram_waitrequest,                                        -- waitrequest
@@ -76,25 +74,25 @@ begin
     	f2h_sdram_byteenable => r_f2h_sdram_byteenable,
     	f2h_sdram_write => r_f2h_sdram_write,
     	valid => r_valid_write);
-	--============================================
+	--============================================/	
 	--! DUT 1
-	--inst_read32 : entity work.avalon_mem_read_32
-	--port map(
-    --	reset => rst,
-    --	clk => clk,
-    --	start => r_valid_write,
-    --	--data_in : out t_mem_array(2**sel_width - 1 downto 0)(bus_width - 1 downto 0);
-    --	data_in_0 => r_data_in_0_out,
-    --	data_in_1 => r_data_in_1_out,
-    --	data_in_2 => r_data_in_2_out,
-    --	data_in_3 => r_data_in_3_out,
-	--	f2h_sdram_address => r_f2h_sdram_address1,
-	--	f2h_sdram_burstcount => r_f2h_sdram1_burstcount,
-	--	f2h_sdram_waitrequest => r_f2h_sdram1_waitrequest,
-	--	f2h_sdram_readdata => r_f2h_sdram_readdata,
-	--	f2h_sdram_readdatavalid => r_f2h_sdram_readdatavalid,
-	--	f2h_sdram_read => r_f2h_sdram_read,
-    --	valid => r_valid_read);
+	inst_read32 : entity work.avalon_mem_read_32
+	port map(
+    	reset => rst,
+    	clk => clk,
+    	start => r_valid_write,
+    	data_out => r_data_out,
+    	data_in_0 => r_data_in_0_out,
+    	data_in_1 => r_data_in_1_out,
+    	data_in_2 => r_data_in_2_out,
+    	data_in_3 => r_data_in_3_out,
+		f2h_sdram_address => r_f2h_sdram_address1,
+		f2h_sdram_burstcount => r_f2h_sdram1_burstcount,
+		f2h_sdram_waitrequest => r_f2h_sdram1_waitrequest,
+		f2h_sdram_readdata => r_f2h_sdram_readdata,
+		f2h_sdram_readdatavalid => r_f2h_sdram_readdatavalid,
+		f2h_sdram_read => r_f2h_sdram_read,
+    	valid => r_valid_read);
 	--============================================
 	p_main : process
 	begin

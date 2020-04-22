@@ -19,7 +19,7 @@ entity avalon_mem_read_32 is
     	reset : in std_logic;
     	clk : in std_logic;
     	start : in std_logic;
-    	--data_in : out t_mem_array(2**sel_width - 1 downto 0)(bus_width - 1 downto 0);
+    	data_out : out t_mem_array(31 downto 0);
     	data_in_0 : out std_logic_vector(31 downto 0);
     	data_in_1 : out std_logic_vector(31 downto 0);
     	data_in_2 : out std_logic_vector(31 downto 0);
@@ -35,11 +35,7 @@ end entity;
 
 --! @brief 
 architecture rtl of avalon_mem_read_32 is
-	
-	--!  
-	constant c_address : std_logic_vector(29 downto 0) := std_logic_vector(to_unsigned(1,30)); -- get base addr from pkg
-	--!  
-	constant c_burstcount : std_logic_vector(7 downto 0) := "00000010";
+
 	--!  
 	type t_fsm is (IDLE, READ_DATA, READ_DATA2, READ_DATA3, DONE);
 	--!  
@@ -58,8 +54,8 @@ begin
 			case r_fsm is
 			 	when IDLE =>
 			 		if start = '1' then
-			 			f2h_sdram_address <= c_address;
-						f2h_sdram_burstcount <= c_burstcount;
+			 			f2h_sdram_address <= AVALON_MEM_READ_ADDRESS;
+						f2h_sdram_burstcount <= AVALON_MEM_BURSTCOUNT;
 						f2h_sdram_read <= '1';
 			 			r_fsm <= READ_DATA;
 			 		end if;
