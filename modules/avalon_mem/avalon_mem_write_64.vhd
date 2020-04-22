@@ -3,8 +3,11 @@ library ieee;
 use ieee.numeric_std.all;
 use ieee.std_logic_1164.all;
 
-library avalon_mem_lib;
-use avalon_mem_lib.avalon_mem_pkg.all;
+--library avalon_mem_lib;
+--use avalon_mem_lib.avalon_mem_pkg.all;
+
+library work;
+use work.avalon_mem_pkg.all;
 
 
 --! Reference. https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/manual/mnl_avalon_spec.pdf
@@ -32,20 +35,22 @@ use avalon_mem_lib.avalon_mem_pkg.all;
 --!		F) Writes with byteenable signals being all 0's are simply passed on to the AvalonMM slave as valid transactions.
 --!		G) The constantBurstBehavior property specifies the behavior of the burst
 --!		signals.
---!		— When constantBurstBehavior is true for a master, the master holds
+--!			
+--!		When constantBurstBehavior is true for a master, the master holds
 --!		address and burstcount stable throughout a burst. When true for a slave,
 --!		constantBurstBehavior declares that the slave expects address and
 --!		burstcount to be held stable throughout a burst.
---!		— When constantBurstBehavior is false, the master holds address and
+
+--!		When constantBurstBehavior is false, the master holds address and
 --!		burstcount stable only for the first transaction of a burst. When
 --!		constantBurstBehavior is false, the slave samples address and
 --!		burstcount only on the first transaction of a burst.
 
 
 --!		The burstcount signal behaves as follows:
---!		• At the start of a burst, burstcount presents the number of sequential transfers
+--!		1/ At the start of a burst, burstcount presents the number of sequential transfers
 --!		in the burst.
---!		• For width <n> of burstcount, the maximum burst length is 2(<n>-1).The
+--!		2/ For width <n> of burstcount, the maximum burst length is 2(<n>-1).The
 --!		minimum legal burst length is one.
 
 --!		At the start of a burst, the slave sees the address and a burst length value on
@@ -59,11 +64,6 @@ use avalon_mem_lib.avalon_mem_pkg.all;
 --!		asserts on the first cycle of each burst.
 
 
-package bus_multiplexer_pkg is
-        type bus_array is array(natural range <>) of std_logic_vector;
-end package;
-
-
 entity avalon_mem_write_64 is
 	generic(
 		gen_sdram_burstcount : integer := 4
@@ -71,7 +71,8 @@ entity avalon_mem_write_64 is
 	port(
     	reset : in std_logic;
     	clk : in std_logic;
-    	data_in : in bus_array(2**sel_width - 1 downto 0)(bus_width - 1 downto 0);
+    	start : in std_logic;
+    	--data_in : in t_mem_array(2**sel_width - 1 downto 0)(bus_width - 1 downto 0);
     	data_in_0 : in std_logic_vector(31 downto 0);
     	data_in_1 : in std_logic_vector(31 downto 0);
     	data_in_2 : in std_logic_vector(31 downto 0);
@@ -81,14 +82,15 @@ entity avalon_mem_write_64 is
     	f2h_sdram_waitrequest : in std_logic;                                        -- waitrequest
     	f2h_sdram_writedata : out std_logic_vector(63 downto 0);  -- writedata
     	f2h_sdram_byteenable : out std_logic_vector(7 downto 0); -- byteenable
-    	f2h_sdram_write : out std_logic);									 -- write
+    	f2h_sdram_write : out std_logic;
+    	valid : out std_logic);
 end entity;
 
 --! @brief 
 architecture rtl of avalon_mem_write_64 is
 	
 	--!  
-	constant c_address : std_logic_vector(28 downto 0) := std_logic_vector(to_unsigned(1,29));
+	constant c_address : std_logic_vector(28 downto 0) := std_logic_vector(to_unsigned(1,29)); -- get base addr from pkg
 	--!  
 	constant c_burstcount : std_logic_vector(7 downto 0) := "00000010";
 	--!  
@@ -98,7 +100,7 @@ architecture rtl of avalon_mem_write_64 is
 
 begin
 
-	p_main : process(rst, clk)
+	p_main : process(reset, clk)
 	begin
 		if reset='1' then
 			r_fsm <= IDLE;
@@ -113,7 +115,7 @@ begin
 			 		if start = '1' then
 			 			f2h_sdram_address <= c_address;
 						f2h_sdram_burstcount <= c_burstcount;
-						f2h_sdram_writedata <= resize(data_in_0,64);
+						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in_0),64));
 						f2h_sdram_write <= '1';
 			 			r_fsm <= WRITE_DATA;
 			 		end if;
@@ -125,21 +127,21 @@ begin
 
 				when WRITE_DATA2 =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <= resize(data_in_1,64);
+						f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in_1),64));
 						r_fsm <= WRITE_DATA3;
 					end if;
 				
 				when WRITE_DATA3 =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <= resize(data_in_2,64);
+						f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in_2),64));
 						r_fsm <= DONE;
 					end if;
 
 			 	when DONE =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <= resize(data_in_3,64);
+						f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in_3),64));
 						r_fsm <= IDLE;
-						f2h_sdram_write <= '1';
+						f2h_sdram_write <= '0';
 					end if;
 
 			 	when others =>
@@ -147,5 +149,7 @@ begin
 			end case;
 		end if;
 	end process; --! p_main
+
+	valid <= '1' when r_fsm = DONE else '0';
 
 end rtl;
