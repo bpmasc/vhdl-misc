@@ -14,14 +14,6 @@ architecture rtl of avalon_mem_tb is
     signal clk: std_logic := '0';
     signal rst: std_logic := '1';
 	signal r_start : std_logic;
-    signal r_data_in_0 :std_logic_vector(31 downto 0) := (others => '1');
-    signal r_data_in_1 :std_logic_vector(31 downto 0) := (others => '0');
-    signal r_data_in_2 :std_logic_vector(31 downto 0) := (others => '1');
-    signal r_data_in_3 :std_logic_vector(31 downto 0) := (others => '0');
-    signal r_data_in_0_out :std_logic_vector(31 downto 0);
-    signal r_data_in_1_out :std_logic_vector(31 downto 0);
-    signal r_data_in_2_out :std_logic_vector(31 downto 0);
-    signal r_data_in_3_out :std_logic_vector(31 downto 0);
     signal r_f2h_sdram_address : std_logic_vector(28 downto 0) := (others=>'0');    -- address
     signal r_f2h_sdram_address1 : std_logic_vector(29 downto 0) := (others=>'0');    -- address
     signal r_f2h_sdram_burstcount : std_logic_vector(7 downto 0); -- burstcount
@@ -36,7 +28,7 @@ architecture rtl of avalon_mem_tb is
 	signal r_f2h_sdram_readdatavalid : std_logic;
 	signal r_f2h_sdram_read :  std_logic;
     signal r_valid_read :  std_logic;
-	signal r_data_in : t_mem_array(31 downto 0);
+	signal r_data_in : t_mem_array(31 downto 0) := (others=>(others=>'0'));
 	signal r_data_out : t_mem_array(31 downto 0);
 
 
@@ -67,10 +59,10 @@ begin
     	clk => clk,
     	start => r_start,
     	data_in => r_data_in,
-    	f2h_sdram_address => r_f2h_sdram_address,    -- address
-    	f2h_sdram_burstcount => r_f2h_sdram_burstcount, -- burstcount
-    	f2h_sdram_waitrequest => r_f2h_sdram_waitrequest,                                        -- waitrequest
-    	f2h_sdram_writedata => r_f2h_sdram_writedata,  -- writedata
+    	f2h_sdram_address => r_f2h_sdram_address,
+    	f2h_sdram_burstcount => r_f2h_sdram_burstcount,
+    	f2h_sdram_waitrequest => r_f2h_sdram_waitrequest,
+    	f2h_sdram_writedata => r_f2h_sdram_writedata,
     	f2h_sdram_byteenable => r_f2h_sdram_byteenable,
     	f2h_sdram_write => r_f2h_sdram_write,
     	valid => r_valid_write);
@@ -82,10 +74,6 @@ begin
     	clk => clk,
     	start => r_valid_write,
     	data_out => r_data_out,
-    	data_in_0 => r_data_in_0_out,
-    	data_in_1 => r_data_in_1_out,
-    	data_in_2 => r_data_in_2_out,
-    	data_in_3 => r_data_in_3_out,
 		f2h_sdram_address => r_f2h_sdram_address1,
 		f2h_sdram_burstcount => r_f2h_sdram1_burstcount,
 		f2h_sdram_waitrequest => r_f2h_sdram1_waitrequest,

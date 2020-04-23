@@ -73,10 +73,6 @@ entity avalon_mem_write_64 is
     	clk : in std_logic;
     	start : in std_logic;
     	data_in : in t_mem_array(31 downto 0);
-    	--data_in_0 : in std_logic_vector(31 downto 0);
-    	--data_in_1 : in std_logic_vector(31 downto 0);
-    	--data_in_2 : in std_logic_vector(31 downto 0);
-    	--data_in_3 : in std_logic_vector(31 downto 0);
     	f2h_sdram_address : out std_logic_vector(28 downto 0);    -- address
     	f2h_sdram_burstcount : out std_logic_vector(7 downto 0); -- burstcount
     	f2h_sdram_waitrequest : in std_logic;                                        -- waitrequest
@@ -89,7 +85,7 @@ end entity;
 --! @brief 
 architecture rtl of avalon_mem_write_64 is
 	--!  
-	type t_fsm is (IDLE, WRITE_DATA, WRITE_DATA2, WRITE_DATA3, DONE);
+	type t_fsm is (IDLE, WRITE_DATA, DONE);
 	--!  
 	signal r_fsm : t_fsm;
 	--! 
@@ -112,8 +108,8 @@ begin
 			 		r_cnt <= 0;
 			 		if start = '1' then
 			 			f2h_sdram_address <= AVALON_MEM_WRITE_ADDRESS;
-						f2h_sdram_burstcount <= AVALON_MEM_BURSTCOUNT;
-						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(0)),64));
+						f2h_sdram_burstcount <= std_logic_vector(to_unsigned(AVALON_MEM_BURSTCOUNT,f2h_sdram_burstcount'length));
+						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(0)),f2h_sdram_writedata'length));
 						f2h_sdram_write <= '1';
 			 			r_cnt <= r_cnt + 1;
 			 			r_fsm <= WRITE_DATA;
@@ -121,7 +117,7 @@ begin
 
 				when WRITE_DATA =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(r_cnt)),64));
+						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(r_cnt)),f2h_sdram_writedata'length));
 						r_cnt <= r_cnt + 1;
 						if r_cnt = AVALON_MEM_BURSTCOUNT-2 then
 							r_fsm <= DONE;
@@ -130,9 +126,9 @@ begin
 
 			 	when DONE =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in(r_cnt)),64));
-						r_fsm <= IDLE;
+						f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in(r_cnt)),f2h_sdram_writedata'length));
 						f2h_sdram_write <= '0';
+						r_fsm <= IDLE;
 					end if;
 
 			 	when others =>

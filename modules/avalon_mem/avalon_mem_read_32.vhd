@@ -20,10 +20,6 @@ entity avalon_mem_read_32 is
     	clk : in std_logic;
     	start : in std_logic;
     	data_out : out t_mem_array(31 downto 0);
-    	data_in_0 : out std_logic_vector(31 downto 0);
-    	data_in_1 : out std_logic_vector(31 downto 0);
-    	data_in_2 : out std_logic_vector(31 downto 0);
-    	data_in_3 : out std_logic_vector(31 downto 0);
 		f2h_sdram_address : out std_logic_vector(29 downto 0) := (others => 'X'); -- address
 		f2h_sdram_burstcount : out std_logic_vector(7 downto 0)  := (others => 'X'); -- burstcount
 		f2h_sdram_waitrequest : in std_logic;                                        -- waitrequest
@@ -37,50 +33,48 @@ end entity;
 architecture rtl of avalon_mem_read_32 is
 
 	--!  
-	type t_fsm is (IDLE, READ_DATA, READ_DATA2, READ_DATA3, DONE);
+	type t_fsm is (IDLE, READ_DATA, DONE);
 	--!  
 	signal r_fsm : t_fsm;
-
+	--!
+	signal r_cnt : integer;
 begin
-
+ 
+	--assert data_out'length-1 < AVALON_MEM_BURSTCOUNT report "Stack overflow" severity error;
+	
 	p_main : process(reset, clk)
 	begin
 		if reset='1' then
 			r_fsm <= IDLE;
 			f2h_sdram_read <= '0';
+			r_cnt <= 0;
 			f2h_sdram_address <= (others=>'0');
 			f2h_sdram_burstcount <= (others=>'0');
+			data_out <= (others=>(others=>'0'));
 		elsif rising_edge(clk) then
 			case r_fsm is
 			 	when IDLE =>
+			 		r_cnt <= 0;
 			 		if start = '1' then
 			 			f2h_sdram_address <= AVALON_MEM_READ_ADDRESS;
-						f2h_sdram_burstcount <= AVALON_MEM_BURSTCOUNT;
+						f2h_sdram_burstcount <= std_logic_vector(to_unsigned(AVALON_MEM_BURSTCOUNT,f2h_sdram_burstcount'length));
 						f2h_sdram_read <= '1';
+			 			r_cnt <= r_cnt + 1;
 			 			r_fsm <= READ_DATA;
 			 		end if;
 
 				when READ_DATA =>
 					if f2h_sdram_waitrequest = '0' then
-						data_in_0 <= f2h_sdram_readdata;
-						r_fsm <= READ_DATA2;
-					end if;
-
-				when READ_DATA2 =>
-					if f2h_sdram_waitrequest = '0' then
-						data_in_1 <= f2h_sdram_readdata;
-						r_fsm <= READ_DATA3;
-					end if;
-				
-				when READ_DATA3 =>
-					if f2h_sdram_waitrequest = '0' then
-						data_in_2 <= f2h_sdram_readdata;
-						r_fsm <= DONE;
+						r_cnt <= r_cnt + 1;
+						data_out(r_cnt) <= f2h_sdram_readdata;
+						if r_cnt = AVALON_MEM_BURSTCOUNT-2 then 
+							r_fsm <= DONE;
+						end if;
 					end if;
 
 			 	when DONE =>
 					if f2h_sdram_waitrequest = '0' then
-						data_in_2 <= f2h_sdram_readdata;
+						data_out(r_cnt) <= f2h_sdram_readdata;
 						r_fsm <= IDLE;
 						f2h_sdram_read <= '0';
 					end if;
