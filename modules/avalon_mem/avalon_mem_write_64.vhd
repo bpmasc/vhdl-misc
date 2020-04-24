@@ -72,7 +72,7 @@ entity avalon_mem_write_64 is
     	reset : in std_logic;
     	clk : in std_logic;
     	start : in std_logic;
-    	data_in : in t_mem_array(31 downto 0);
+    	data_in : in t_mem_array;
     	f2h_sdram_address : out std_logic_vector(28 downto 0);    -- address
     	f2h_sdram_burstcount : out std_logic_vector(7 downto 0); -- burstcount
     	f2h_sdram_waitrequest : in std_logic;                                        -- waitrequest
@@ -89,7 +89,7 @@ architecture rtl of avalon_mem_write_64 is
 	--!  
 	signal r_fsm : t_fsm;
 	--! 
-	signal r_cnt : integer;
+	signal r_cnt : integer	range 0 to 127;
 begin
 
 	p_main : process(reset, clk)
@@ -100,7 +100,7 @@ begin
 			f2h_sdram_byteenable <= (others=>'1');
 			f2h_sdram_address <= (others=>'0');
 			f2h_sdram_burstcount <= (others=>'0');
-			f2h_sdram_writedata <= (others=>'0');
+			--f2h_sdram_writedata <= (others=>'0');
 			r_cnt <= 0;
 		elsif rising_edge(clk) then
 			case r_fsm is
@@ -109,7 +109,7 @@ begin
 			 		if start = '1' then
 			 			f2h_sdram_address <= AVALON_MEM_WRITE_ADDRESS;
 						f2h_sdram_burstcount <= std_logic_vector(to_unsigned(AVALON_MEM_BURSTCOUNT,f2h_sdram_burstcount'length));
-						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(0)),f2h_sdram_writedata'length));
+						--f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(0)),64));
 						f2h_sdram_write <= '1';
 			 			r_cnt <= r_cnt + 1;
 			 			r_fsm <= WRITE_DATA;
@@ -117,7 +117,6 @@ begin
 
 				when WRITE_DATA =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(r_cnt)),f2h_sdram_writedata'length));
 						r_cnt <= r_cnt + 1;
 						if r_cnt = AVALON_MEM_BURSTCOUNT-2 then
 							r_fsm <= DONE;
@@ -126,7 +125,7 @@ begin
 
 			 	when DONE =>
 					if f2h_sdram_waitrequest = '0' then
-						f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in(r_cnt)),f2h_sdram_writedata'length));
+						--f2h_sdram_writedata <=  std_logic_vector(resize(unsigned(data_in(r_cnt)),64));
 						f2h_sdram_write <= '0';
 						r_fsm <= IDLE;
 					end if;
@@ -137,6 +136,7 @@ begin
 		end if;
 	end process; --! p_main
 
+	f2h_sdram_writedata <= std_logic_vector(resize(unsigned(data_in(r_cnt)),64));
 	valid <= '1' when r_fsm = DONE else '0';
 
 end rtl;
