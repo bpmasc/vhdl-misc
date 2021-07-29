@@ -2,14 +2,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library adc124s_lib;
---use adc124s_lib.adc124s_utils_pkg.all;
+library spi_3x_master_lib;
+use spi_3x_master_lib.spi_3x_utils_pkg.all;
 
-entity axi_l_adc124_v0_1_S00_AXI is
+entity axi_l_spi_3x_master_v0_1_S00_AXI is
 	generic (
 		-- Users to add parameters here
-        gen_n_adc : integer := 1;
-		
+
 		-- User parameters ends
 		-- Do not modify the parameters beyond this line
 
@@ -20,12 +19,9 @@ entity axi_l_adc124_v0_1_S00_AXI is
 	);
 	port (
 		-- Users to add ports here
-        spi_sclk : out std_logic_vector(gen_n_adc-1 downto 0);
-        spi_ncs : out std_logic_vector(gen_n_adc-1 downto 0);
-        spi_mosi : out std_logic_vector(gen_n_adc-1 downto 0);
-        spi_miso : in std_logic_vector(gen_n_adc-1 downto 0);
-        
-		
+        spi_sclk : out std_logic;
+        spi_mosi : out std_logic;
+        spi_miso : in std_logic;
 		-- User ports ends
 		-- Do not modify the ports beyond this line
 
@@ -90,9 +86,9 @@ entity axi_l_adc124_v0_1_S00_AXI is
     		-- accept the read data and response information.
 		S_AXI_RREADY	: in std_logic
 	);
-end axi_l_adc124_v0_1_S00_AXI;
+end axi_l_spi_3x_master_v0_1_S00_AXI;
 
-architecture arch_imp of axi_l_adc124_v0_1_S00_AXI is
+architecture arch_imp of axi_l_spi_3x_master_v0_1_S00_AXI is
 
 	-- AXI4LITE signals
 	signal axi_awaddr	: std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
@@ -154,15 +150,6 @@ architecture arch_imp of axi_l_adc124_v0_1_S00_AXI is
 	signal reg_data_out	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal byte_index	: integer;
 	signal aw_en	: std_logic;
-    --! User signals
-
-    signal rst : std_logic;
-    
-    type t_array is array (7 downto 0) of std_logic_vector(15 downto 0);
-	signal r_data_out_a : t_array := (others=>(others=>'0'));
-	signal r_data_out_b : t_array := (others=>(others=>'0'));
-	signal r_data_out_c : t_array := (others=>(others=>'0'));
-	signal r_data_out_d : t_array := (others=>(others=>'0'));
 
 begin
 	-- I/O Connections assignments
@@ -672,78 +659,76 @@ begin
 	-- and the slave is ready to accept the read address.
 	slv_reg_rden <= axi_arready and S_AXI_ARVALID and (not axi_rvalid) ;
 
-	process (r_data_out_a,r_data_out_b,r_data_out_c,r_data_out_d,slv_reg0, slv_reg1, slv_reg2, slv_reg3, slv_reg4, slv_reg5, slv_reg6, slv_reg7, slv_reg8, slv_reg9, slv_reg10, slv_reg11, slv_reg12, slv_reg13, slv_reg14, slv_reg15, slv_reg16, slv_reg17, slv_reg18, slv_reg19, slv_reg20, slv_reg21, slv_reg22, slv_reg23, slv_reg24, slv_reg25, slv_reg26, slv_reg27, slv_reg28, slv_reg29, slv_reg30, slv_reg31, axi_araddr, S_AXI_ARESETN, slv_reg_rden)
+	process (slv_reg0, slv_reg1, slv_reg2, slv_reg3, slv_reg4, slv_reg5, slv_reg6, slv_reg7, slv_reg8, slv_reg9, slv_reg10, slv_reg11, slv_reg12, slv_reg13, slv_reg14, slv_reg15, slv_reg16, slv_reg17, slv_reg18, slv_reg19, slv_reg20, slv_reg21, slv_reg22, slv_reg23, slv_reg24, slv_reg25, slv_reg26, slv_reg27, slv_reg28, slv_reg29, slv_reg30, slv_reg31, axi_araddr, S_AXI_ARESETN, slv_reg_rden)
 	variable loc_addr :std_logic_vector(OPT_MEM_ADDR_BITS downto 0);
-	variable loc_addr_mod : integer;
-	variable loc_addr_input : integer;
 	begin
 	    -- Address decoding for reading registers
 	    loc_addr := axi_araddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
 	    case loc_addr is
 	      when b"00000" =>
-	        reg_data_out <= x"0000" & r_data_out_a(0);--slv_reg0;
+	        reg_data_out <= slv_reg0;
 	      when b"00001" =>
-	        reg_data_out <= x"0000" & r_data_out_b(0);--slv_reg1;
+	        reg_data_out <= slv_reg1;
 	      when b"00010" =>
-	        reg_data_out <= x"0000" & r_data_out_c(0);--slv_reg2;
+	        reg_data_out <= slv_reg2;
 	      when b"00011" =>
-	        reg_data_out <= x"0000" & r_data_out_d(0);--slv_reg3;
+	        reg_data_out <= slv_reg3;
 	      when b"00100" =>
-	        reg_data_out <= x"0000" & r_data_out_a(1);--slv_reg4;
+	        reg_data_out <= slv_reg4;
 	      when b"00101" =>
-	        reg_data_out <= x"0000" & r_data_out_b(1);--slv_reg5;
+	        reg_data_out <= slv_reg5;
 	      when b"00110" =>
-	        reg_data_out <= x"0000" & r_data_out_c(1);--slv_reg6;
+	        reg_data_out <= slv_reg6;
 	      when b"00111" =>
-	        reg_data_out <= x"0000" & r_data_out_d(1);--slv_reg7;
+	        reg_data_out <= slv_reg7;
 	      when b"01000" =>
-	        reg_data_out <= x"0000" & r_data_out_a(2);--slv_reg8;
+	        reg_data_out <= slv_reg8;
 	      when b"01001" =>
-	        reg_data_out <= x"0000" & r_data_out_b(2);--slv_reg9;
+	        reg_data_out <= slv_reg9;
 	      when b"01010" =>
-	        reg_data_out <= x"0000" & r_data_out_c(2);--slv_reg10;
+	        reg_data_out <= slv_reg10;
 	      when b"01011" =>
-	        reg_data_out <= x"0000" & r_data_out_d(2);--slv_reg11;
+	        reg_data_out <= slv_reg11;
 	      when b"01100" =>
-	        reg_data_out <= x"0000" & r_data_out_a(3);--slv_reg12;
+	        reg_data_out <= slv_reg12;
 	      when b"01101" =>
-	        reg_data_out <= x"0000" & r_data_out_b(3);--slv_reg13;
+	        reg_data_out <= slv_reg13;
 	      when b"01110" =>
-	        reg_data_out <= x"0000" & r_data_out_c(3);--slv_reg14;
+	        reg_data_out <= slv_reg14;
 	      when b"01111" =>
-	        reg_data_out <= x"0000" & r_data_out_d(3);--slv_reg15;
+	        reg_data_out <= slv_reg15;
 	      when b"10000" =>
-	        reg_data_out <= x"0000" & r_data_out_a(4);--slv_reg16;
+	        reg_data_out <= slv_reg16;
 	      when b"10001" =>
-	        reg_data_out <= x"0000" & r_data_out_b(4);--slv_reg17;
+	        reg_data_out <= slv_reg17;
 	      when b"10010" =>
-	        reg_data_out <= x"0000" & r_data_out_c(4);--slv_reg18;
+	        reg_data_out <= slv_reg18;
 	      when b"10011" =>
-	        reg_data_out <= x"0000" & r_data_out_d(4);--slv_reg19;
+	        reg_data_out <= slv_reg19;
 	      when b"10100" =>
-	        reg_data_out <= x"0000" & r_data_out_a(5);--slv_reg20;
+	        reg_data_out <= slv_reg20;
 	      when b"10101" =>
-	        reg_data_out <= x"0000" & r_data_out_b(5);--slv_reg21;
+	        reg_data_out <= slv_reg21;
 	      when b"10110" =>
-	        reg_data_out <= x"0000" & r_data_out_c(5);--slv_reg22;
+	        reg_data_out <= slv_reg22;
 	      when b"10111" =>
-	        reg_data_out <= x"0000" & r_data_out_d(5);--;
+	        reg_data_out <= slv_reg23;
 	      when b"11000" =>
-	        reg_data_out <= x"0000" & r_data_out_a(6);--slv_reg24;
+	        reg_data_out <= slv_reg24;
 	      when b"11001" =>
-	        reg_data_out <= x"0000" & r_data_out_b(6);--slv_reg25;
+	        reg_data_out <= slv_reg25;
 	      when b"11010" =>
-	        reg_data_out <= x"0000" & r_data_out_c(6);--slv_reg26;
+	        reg_data_out <= slv_reg26;
 	      when b"11011" =>
-	        reg_data_out <= x"0000" & r_data_out_d(6);--slv_reg27;
+	        reg_data_out <= slv_reg27;
 	      when b"11100" =>
-	        reg_data_out <= x"0000" & r_data_out_a(7);--slv_reg28;
+	        reg_data_out <= slv_reg28;
 	      when b"11101" =>
-	        reg_data_out <= x"0000" & r_data_out_b(7);--slv_reg29;
+	        reg_data_out <= slv_reg29;
 	      when b"11110" =>
-	        reg_data_out <= x"0000" & r_data_out_c(7);--slv_reg30;
+	        reg_data_out <= slv_reg30;
 	      when b"11111" =>
-	        reg_data_out <= x"0000" & r_data_out_d(7);--slv_reg31;
+	        reg_data_out <= slv_reg31;
 	      when others =>
 	        reg_data_out  <= (others => '0');
 	    end case;
@@ -767,68 +752,30 @@ begin
 	  end if;
 	end process;
     
-    rst <= '1' when S_AXI_ARESETN = '0' else '0';
     
-      g_adc124s: for i in 0 to gen_n_adc-1 generate
-        b_adc124s : block
-                type t_sync_state is (START,WAIT_VALID,WAIT_START);
-                signal r_sync_state : t_sync_state; 
-                signal r_start : std_logic;
-                signal r_valid : std_logic;            
-                signal r_sync_cnt : integer;
-            begin
-            
-               -- Add user logic here
-                process( S_AXI_ACLK ) is
-                    begin
-                      if (rising_edge (S_AXI_ACLK)) then
-                        if ( S_AXI_ARESETN = '0' ) then
-                          r_sync_cnt <= 0;
-                          r_sync_state <= WAIT_START;
-                        else
-                            r_start <= '0';
-                            
-                           if r_sync_cnt > 0 then
-                            r_sync_cnt <= r_sync_cnt - 1;
-                           end if;
-	                       
-	                       case r_sync_state is
-        	                   when START =>
-        	                       if r_sync_cnt=0 then
-        	                           r_start <= '1';
-        	                           r_sync_state <= WAIT_VALID;
-        	                       end if;
-	                           when WAIT_VALID =>
-	                               if r_valid = '1' then
-	                                   r_sync_state <= WAIT_START;
-	                               end if;
-	                           when WAIT_START =>
-	                               r_sync_cnt <= 500;
-	                               r_sync_state <= START;
-	                           when others =>
-	                               r_sync_state <= START;
-                            end case;
-
-                        end if;
-                      end if;
-                end process; 
-	           
-               inst_adc124s : entity adc124s_lib.adc124s(rtl)
-               port map(
-                rst => rst,
-                clk => S_AXI_ACLK,
-                start => r_start,
-                data_out_a => r_data_out_a(i),
-                data_out_b => r_data_out_b(i),
-                data_out_c => r_data_out_c(i),
-                data_out_d => r_data_out_d(i),
-                spi_miso => spi_miso(i),
-                spi_sclk => spi_sclk(i),
-                spi_ncs => spi_ncs(i),
-                spi_mosi => spi_mosi(i),
-                valid => r_valid);
-        end block;
-    end generate g_adc124s;
+    -- Add user logic here
+    b_spi_3x_master : block
+        signal reset : std_logic;
+        signal r_start : std_logic;
+        signal r_data_in : std_logic_vector(31 downto 0);
+        signal r_data_out : std_logic_vector(31 downto 0);
+        signal r_valid : std_logic;
+        
+    begin
+	
+	reset <= not S_AXI_ARESETN;
+	
+	inst_spi_3x_master : entity spi_3x_master_lib.spi_3x_master(rtl)
+		port map(
+			rst => reset,
+			clk => S_AXI_ACLK,
+			start => r_start,
+        	data_in => r_data_in,
+        	data_out => r_data_out,
+			spi_miso => spi_miso,
+			spi_sclk => spi_sclk,
+			spi_mosi => spi_mosi,
+			valid => r_valid);
 	-- User logic ends
-
+    end block;
 end arch_imp;
